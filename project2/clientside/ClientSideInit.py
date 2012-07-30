@@ -14,6 +14,8 @@ Purpose:
 import os
 import json
 import httplib
+import random
+import subprocess
 import GlobalArgs
 import xml.etree.ElementTree as ET
 from M2Crypto import RSA
@@ -27,9 +29,30 @@ serialnum = xmlroot.find('serialnum').text.strip()
 
 #####################
 #Fetch server hardware infomation
-#CpuID+MainDiskID+NICMAC
+#mainDiskSn+mainNicMac
 #####################
-hardinfo = "ckejh345jhyutg00:1A:92:E6:D0:0D-shiyan technolei colcd-cdddcdf"
+p=subprocess.Popen("hdparm -I /dev/sda | grep 'Serial Number' | awk -F: '{print $2}'",shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+if p.stderr.read() == "":
+    maindisksn = p.stdout.read().strip()
+else:
+    raise Exception
+
+p = subprocess.Popen("ifconfig eth0 | grep HWaddr | awk '{print $5}'",shell=True,stdout=subprocess.PIPE,stderr=subprocess.PIPE)
+if p.stderr.read() == "":
+    mainnicmac = p.stdout.read().strip()
+else:
+    raise Exception
+
+def getSerialNumUnit(num):
+    serialnum = ""
+    while len(serialnum) <  num:
+        intnum = random.randint(0,25)
+        lcletter = chr(97 + intnum)
+        if serialnum.find(lcletter) == -1:
+           serialnum  = serialnum + lcletter
+    return serialnum.upper()
+
+hardinfo ="WD-"+getSerialNumUnit(10)+"/"+maindisksn+"/"+getSerialNumUnit(10)+"/"+mainnicmac+"/"+getSerialNumUnit(10)
 
 #####################
 #Encrypt hardware infomation with the secure transmission public key
@@ -38,20 +61,14 @@ stprikeystr =  xmlroot.find('stprikey').text
 privatekey = RSA.load_key_string(stprikeystr)
 encrypthardinfo = privatekey.private_encrypt(hardinfo,RSA.pkcs1_padding)
 
-print stprikeystr
-
-#serialnum = "ONVAMK-QPOCHM-RJKUHS-YBIPVD"
-print serialnum
-
-
-connection = httplib.HTTPConnection('127.0.0.1:8087')
+connection = httplib.HTTPConnection(GlobalArgs.vhostname)
 header = {'Content-Type': 'application/x-www-form-urlencoded'}
 connection.request('POST','/st/'+serialnum,encrypthardinfo,header)
 result = connection.getresponse().read()
 resultdict = json.loads(result)
 
 if resultdict["success"] == True:
-    connection = httplib.HTTPConnection('127.0.0.1:8087')
+    connection = httplib.HTTPConnection(GlobalArgs.vhostname)
     connection.request('GET','/st/'+serialnum)
     result = connection.getresponse().read()
     

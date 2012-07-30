@@ -19,7 +19,7 @@ import optparse
 import random
 import GlobalArgs
 import subprocess
-#import MySQLdb
+import MySQLdb
 from M2Crypto import RSA,BIO
 from xml.dom.minidom import Document
 
@@ -98,7 +98,6 @@ rsakey.save_key(GlobalArgs.keyspath+os.sep+serialnum+os.sep+"ED"+"-"+'privatekey
 #####################
 #Generate customer information xml file
 #####################
-
 doc = Document()
 root = doc.createElement("customerinfo")
 doc.appendChild(root)
@@ -134,12 +133,11 @@ f.close()
 #####################
 #Add  customer infomation to database
 #####################
-'''
 dbconn = MySQLdb.connect(host=GlobalArgs.mysqlserver,user=GlobalArgs.mysqluser,passwd=GlobalArgs.mysqlpwd)
 dbcursor = dbconn.cursor()
 dbconn.select_db('SoftwareEncryption')
 value = [customer,email,serialnum]
 dbcursor.execute("insert into customerinfo (customer,email,sn) values(%s,%s,%s)",value)
 dbcursor.close()
-'''
+
 

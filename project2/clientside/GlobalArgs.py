@@ -10,9 +10,6 @@ Created on Jul 26, 2012
 keyspath = "/tmp/temp/clientside"
 
 ###################
-#Mysql Infomation
+#Verify server hostname or ipaddress
 ###################
-mysqlserver = "localhost"
-mysqluser = "root"
-mysqlpwd = "976553708"
-
+vhostname = "192.168.0.111"

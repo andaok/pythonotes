@@ -12,9 +12,10 @@ Purpose :
 '''
 
 import os
+import MySQLdb
 import GlobalArgs
 import subprocess
-from M2Crypto import RSA,BIO
+from M2Crypto import RSA
 from bottle import route,run,request,debug,static_file
 
 ###############################
@@ -37,7 +38,19 @@ def generate_RegCode(serialnum):
          
          execode = subprocess.call("test -s %s"%(GlobalArgs.keyspath+os.sep+serialnum+os.sep+'regcode.bin'),shell=True)
          if execode == 0:
-            return {"success":True,"error":"no error"}
+             #add customer hardware information to database
+             hardinfolist = decrypthardinfo.split('/')
+             maindisksn = hardinfolist[1]
+             mainnicmac = hardinfolist[3]
+             
+             dbconn = MySQLdb.connect(host=GlobalArgs.mysqlserver,user=GlobalArgs.mysqluser,passwd=GlobalArgs.mysqlpwd)
+             dbcursor = dbconn.cursor()
+             dbconn.select_db('SoftwareEncryption')
+             value = [maindisksn,mainnicmac,serialnum]
+             dbcursor.execute("update customerinfo set  maindisksn=%s,mainnicmac=%s where sn=%s",value)
+             dbcursor.close()
+             
+             return {"success":True,"error":"no error"}
          else:
             return {"success":False,"error":"generate registration code fail in server side"}  
     else:
@@ -56,7 +69,7 @@ def return_Regcode(serialnum):
       
 
 ################################
-#Verify the registration code for customer
+#Return ED-publickey to customer
 ################################
 @route('/ed/<serialnum>',method="GET")
 def return_EDpubkey(serialnum):
