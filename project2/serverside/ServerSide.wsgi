@@ -15,7 +15,6 @@ import os
 import sys
 import bottle
 import MySQLdb
-import GlobalArgs
 import subprocess
 from M2Crypto import RSA
 from bottle import route,run,request,debug,static_file
@@ -23,6 +22,8 @@ from bottle import route,run,request,debug,static_file
 os.chdir(os.path.dirname(__file__))
 wsgi_dir=os.path.dirname(__file__)
 sys.path = [wsgi_dir]+sys.path
+
+import GlobalArgs
 
 ###############################
 #Generate registration code
