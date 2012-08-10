@@ -42,19 +42,23 @@ else:
 ###################################
 #Verify that the customer is an authorized user
 ###################################
+try:
+    w = open(GlobalArgs.keyspath+os.sep+'regcode.bin','rb')
+except IOError:
+    raise Exception("Can not find the registration code")
+else:
+    data = w.read()
+    w.close()
+
 execode = subprocess.call("test -s %s"%(GlobalArgs.keyspath+os.sep+'ED-publickey.pem'),shell=True)
 if execode != 0:
     connection = httplib.HTTPConnection(GlobalArgs.vhostname)
-    connection.request('GET','/ed/'+serialnum)
+    connection.request('GET','/software/verify/ed/'+serialnum)
     result = connection.getresponse().read()
     
     f = open(GlobalArgs.keyspath+os.sep+'ED-publickey.pem','w')
     f.write(result)
     f.close()
-
-w = open(GlobalArgs.keyspath+os.sep+'regcode.bin','rb')
-data = w.read()
-w.close()
 
 publickey = RSA.load_pub_key(GlobalArgs.keyspath+os.sep+'ED-publickey.pem')
 decrypthardinfo = publickey.public_decrypt(data,RSA.pkcs1_padding)

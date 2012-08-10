@@ -63,13 +63,13 @@ encrypthardinfo = privatekey.private_encrypt(hardinfo,RSA.pkcs1_padding)
 
 connection = httplib.HTTPConnection(GlobalArgs.vhostname)
 header = {'Content-Type': 'application/x-www-form-urlencoded'}
-connection.request('POST','/st/'+serialnum,encrypthardinfo,header)
+connection.request('POST','/software/verify/st/'+serialnum,encrypthardinfo,header)
 result = connection.getresponse().read()
 resultdict = json.loads(result)
 
 if resultdict["success"] == True:
     connection = httplib.HTTPConnection(GlobalArgs.vhostname)
-    connection.request('GET','/st/'+serialnum)
+    connection.request('GET','/software/verify/st/'+serialnum)
     result = connection.getresponse().read()
     
     f = open(GlobalArgs.keyspath+os.sep+'regcode.bin','w')

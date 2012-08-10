@@ -78,6 +78,8 @@ if execode != 0:
     execode = subprocess.call("mkdir -p %s"%(GlobalArgs.keyspath+os.sep+serialnum),shell=True)
     if execode != 0:
         raise Exception("create keys store path fail")
+    else:
+        execode = subprocess.call("chown -R apache:apache %s"%(GlobalArgs.keyspath+os.sep+serialnum),shell=True)
 
 ####################
 #A pair of keys generation for secure transmission
